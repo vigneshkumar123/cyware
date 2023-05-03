@@ -1,0 +1,74 @@
+<?php
+/** @var \Codilar\Witch\Router $this */
+$urlString = urldecode($_POST['url'] ?? '');
+$maxUrlLimit = 10;
+?>
+<style>
+    form {
+        padding: 1rem;
+    }
+    form .form-group {
+        margin-bottom: 1rem;
+    }
+    div.result {
+        margin-top: 1rem;
+    }
+    .card {
+        background: #f0f0f0;
+        padding: 1rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 5px;
+    }
+</style>
+<fieldset class="card">
+    <legend>Find technology by URL</legend>
+    <form method="post" action="/single-url">
+        <div class="form-group">
+            <label for="url-input">Enter URL</label>
+            <input type="url"
+                   class="form-control"
+                   id="url-input"
+                   name="url"
+                   aria-describedby="URL Input"
+                   placeholder="https://www.codilar.com/"
+                   value="<?= $urlString ?>"
+            >
+            <div>
+                <small id="url-input-help" class="form-text text-muted">Enter full URL including the http/https</small>
+            </div>
+            <div>
+                <small id="url-input-help" class="form-text text-muted">Multiple URLs can be put comma separated (Max <?= $maxUrlLimit ?>)</small>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Check</button>
+        <a href="/" class="btn btn-default">Back</a>
+    </form>
+</fieldset>
+<?php if ($urlString): ?>
+    <?php
+        $urls = array_slice(explode(',', $urlString), 0, $maxUrlLimit);
+    ?>
+    <?php foreach ($urls as $url): ?>
+        <?php
+            $url = trim($url);
+            $checker = new \Codilar\Witch\Checker();
+            $technology = $checker->check($url);
+            $link = sprintf('<a href="%s" target="_blank">%s</a>', $url, $url);
+        ?>
+        <div class="result card">
+            <?php if ($technology): ?>
+                <div>
+                <span>
+                    According to the data collected by <?= $this->getData('appName') ?>,
+                    <strong><?= $link ?></strong> is built using
+                    <strong>
+                        <a href="<?= sprintf('https://www.google.com/search?q=%s', urlencode($technology)) ?>" target="_blank"><?= $technology ?></a>
+                    </strong>
+                </span>
+                </div>
+            <?php else: ?>
+                <span>Unfortunately, <?= $this->getData('appName') ?> could not identify the technology for <strong><?= $link ?></strong></span>
+            <?php endif; ?>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>

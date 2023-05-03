@@ -1,0 +1,18 @@
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$logger = new \Codilar\Witch\Logger();
+$file = new \Codilar\Witch\File();
+try {
+    if (count($argv) < 3) {
+        throw new \Exception('Usage: bin/witch <inputDir> <outputDir>');
+    }
+    $cwd = getcwd();
+    $inputDir = $file->getAbsolutePath($argv[1], $cwd);
+    $outputDir = $file->getAbsolutePath($argv[2], $cwd);
+    $cli = new \Codilar\Witch\Cli($inputDir, $outputDir);
+    $cli->execute();
+} catch (\Exception $exception) {
+    $logger->log($exception->getMessage(), true);
+}

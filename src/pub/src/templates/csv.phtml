@@ -1,0 +1,122 @@
+<?php
+   if(isset($_POST['submit']))
+   {
+     // Allowed types
+     $csvTypes = array('text/x-comma-separated-values', 'text/comma-separated-values', 'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv', 'text/x-csv', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.msexcel', 'text/plain');
+     
+     //Table
+     $tableRows='';
+     
+     //Check selected file is csv
+     if(!empty($_FILES['url']['name']) && in_array($_FILES['url']['type'], $csvTypes))
+     {
+       
+       //file upload
+       if(is_uploaded_file($_FILES['url']['tmp_name']))
+       {
+         
+         //Open CSV file with read only mode from tmp
+         $file = fopen($_FILES['url']['tmp_name'], 'r');
+         
+         // Skip the first line
+         fgetcsv($file);
+   
+         $user_arr = array();
+   
+         //Read CSV data Line by Line
+         while(($row = fgetcsv($file)) !== FALSE)
+         {
+           
+           //Get row data
+           $id=$row[0];
+           $url=$row[1];  
+   
+           if ($url)
+           {
+             $urls = array_slice(explode(',', $url), 0, $maxUrlLimit);
+             foreach ($urls as $urlString)
+               {
+                 $urlString = trim($url);
+                 $checker = new \Codilar\Witch\Checker();
+                 $technology = $checker->check($urlString);
+               }
+           }
+
+           // get array values
+           $user_arr[] = array($id,$url,$technology);
+   
+         }
+         
+         // Close opened CSV file
+         fclose($file);
+   
+         // export csv file
+         header('Content-Type: text/csv; charset=utf-8');
+         header('Content-Disposition: attachment; filename=WITCH™ Codilar.csv');
+         $output = fopen('php://output', 'w');
+         fputcsv($output, array('Sl No.', 'Url Links', 'Versions'));
+   
+         if (count($user_arr) > 0) {
+             foreach ($user_arr as $row) {
+                 fputcsv($output, $row);
+             }
+         }
+         exit();
+         
+       }else{
+         echo "<h4>Upload Failed</h4>";
+       }
+     }else{
+       echo "<h4>Invalid File</h4>";
+     }
+   }
+   ?>
+<html>
+   <head>
+      <title>Upload CSV file</title>
+      <style>
+         form {
+         padding: 1rem;
+         }
+         form .form-group {
+         margin-bottom: 1rem;
+         }
+         div.result {
+         margin-top: 1rem;
+         }
+         .card {
+         background: #f0f0f0;
+         padding: 1rem;
+         border: 1px solid #d0d0d0;
+         border-radius: 5px;
+         }
+         table, td, th {  
+         border: 1px solid #ddd;
+         text-align: left;
+         }
+         table {
+         border-collapse: collapse;
+         width: 100%;
+         }
+         th, td {
+         padding: 15px;
+         }
+      </style>
+   </head>
+   <body>
+      <fieldset class="card">
+         <legend>Find technology by URL</legend>
+         <form method='post' action='' enctype='multipart/form-data'>
+            <div class="form-group">
+               <label for="url-input">Upload URL (CSV File)</label>
+               <input type="file"  name="url" required class="form-control input-sm" accept=".csv">
+               <div>
+                  <small id="url-input-help" class="form-text text-muted">Upload full URL including the http/https</small>
+               </div>
+            </div>
+            <button type="submit" name="submit" class="btn btn-primary">Check</button>
+            <a href="/" class="btn btn-default">Back</a>
+         </form>
+      </fieldset>
+   </body>
+</html>

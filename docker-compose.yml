@@ -1,0 +1,6 @@
+version: "3"
+services:
+  cyware:
+    image: vignesh4111999/cyware:latest
+    ports:
+      - "80:80"

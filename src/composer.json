@@ -1,0 +1,20 @@
+{
+    "name": "codilar/witch",
+    "description": "What Is The Code Here (WITCH)",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Jayanka Ghosh",
+            "email": "joy@codilar.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Codilar\\Witch\\": "src/"
+        }
+    },
+    "require": {
+        "paquettg/php-html-parser": "^3.1",
+        "ext-curl": "*"
+    }
+}
